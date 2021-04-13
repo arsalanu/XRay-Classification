@@ -44,23 +44,23 @@ def output_visualise(record, epochs):
 def model_flow(image_input_size):
     model = keras.models.Sequential()
 
-    model.add(keras.layers.Conv2D(64, 3, padding="same", activation="relu",
+    model.add(keras.layers.Conv2D(256, 3, padding="same", activation="relu",
                                   input_shape=(image_input_size[0], image_input_size[1], 3)))
     model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(keras.layers.Conv2D(96, 3, padding="same", activation="relu"))
-    model.add(keras.layers.SpatialDropout2D(0.3))
-    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(keras.layers.Dropout(0.3))
     model.add(keras.layers.Conv2D(128, 3, padding="same", activation="relu"))
     model.add(keras.layers.SpatialDropout2D(0.3))
     model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
     model.add(keras.layers.Dropout(0.3))
     model.add(keras.layers.Conv2D(128, 3, padding="same", activation="relu"))
+    model.add(keras.layers.SpatialDropout2D(0.3))
+    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+    model.add(keras.layers.Dropout(0.3))
+    model.add(keras.layers.Conv2D(64, 3, padding="same", activation="relu"))
     model.add(keras.layers.SpatialDropout2D(0.4))
     model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
     model.add(keras.layers.Dropout(0.4))
     model.add(keras.layers.Flatten())
-    model.add(keras.layers.Dense(128, activation="relu"))
+    model.add(keras.layers.Dense(192, activation="relu"))
     model.add(keras.layers.Dense(192, activation="relu"))
     model.add(keras.layers.Dense(2, activation="softmax"))
 
@@ -78,8 +78,8 @@ def model_run(data, model):
 
     datagen.fit(data["x_train"])
 
-    learning_rate = 0.00001
-    epochs = 80
+    learning_rate = 0.0001
+    epochs = 300
 
     tf.summary.scalar("learning rate", data=learning_rate, step=epochs)
 

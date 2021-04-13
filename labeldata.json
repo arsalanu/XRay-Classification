@@ -1,0 +1,12 @@
+{
+  "labels": [
+  {
+    "id": 0,
+    "class_name": "normal"
+    },
+  {
+    "id": 1,
+    "class_name": "pneumonia"
+    }
+  ]
+}

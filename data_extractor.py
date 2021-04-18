@@ -41,7 +41,7 @@ def reshape_normalise_data(data, image_input_size):
 
 def extract(request):
     label_file_path = "labeldata.json"  # json which has the label data for images
-    image_dir_path = "Datasets\\archive\\chest_xray"  # Where test, train and validation images are stored
+    image_dir_path = "Datasets/archive/chest_xray"  # Where test, train and validation images are stored
     image_input_size = [256, 256]  # Images resized to a uniform size for model fitting
     output_string = ""
     request_dict = {}

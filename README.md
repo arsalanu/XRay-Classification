@@ -7,6 +7,6 @@ Database used: https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia
 -- A more detailed description will be placed here, still working on accuracy and good generalisation
 
 ## Issues
--- Overfitting problem with training data accuracy quickly climbing to high 90% while validation accuracy doesn't budge past 75% regardless of epoch increase, dropout, layer simplicity and complexity, learning rate, data shuffling or augmentation. 
+-- Overfitting problem with training data accuracy quickly climbing to high 90% while validation accuracy doesn't budge past 75% regardless of testing with various epoch increase/decrease, dropout, architecture simplification (reduction of layers and nodes), learning rate, data shuffling or data augmentation. There could be something I'm not seeing here.
 
   Note that this problem seems to only occur when using the "test" dataset for validation, and does not occur when using a portion (10-20%) of the training data as validation data (with the leftover data being used as training data). In the latter case, training and validation converge well at 90+% accuracy and with minimal loss. 

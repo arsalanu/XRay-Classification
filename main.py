@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report
-from tensorflow import keras
+from tensorflow.compat.v1 import keras
 from data_extractor import extract, label_generator
 from datetime import datetime
 from model_run import process_model
@@ -39,58 +39,52 @@ def output_visualise(record, epochs):
     plt.legend(loc='upper right')
     plt.title('Training and Validation Loss')
     plt.show()
+    plt.close()
 
 
 def model_flow(image_input_size):
     model = keras.models.Sequential()
 
-    model.add(keras.layers.Conv2D(256, 3, padding="same", activation="relu",
-                                  input_shape=(image_input_size[0], image_input_size[1], 3)))
-    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(keras.layers.Conv2D(128, 3, padding="same", activation="relu"))
-    model.add(keras.layers.SpatialDropout2D(0.3))
-    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(keras.layers.Dropout(0.3))
-    model.add(keras.layers.Conv2D(128, 3, padding="same", activation="relu"))
-    model.add(keras.layers.SpatialDropout2D(0.3))
-    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(keras.layers.Dropout(0.3))
+    model.add(keras.layers.Conv2D(32, 3, padding="same", activation="relu",
+                                   input_shape=(image_input_size[0], image_input_size[1], 3)))
+    model.add(keras.layers.SpatialDropout2D(0.8))
+    model.add(keras.layers.MaxPooling2D(2,2))
+
     model.add(keras.layers.Conv2D(64, 3, padding="same", activation="relu"))
-    model.add(keras.layers.SpatialDropout2D(0.4))
-    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(keras.layers.Dropout(0.4))
+    model.add(keras.layers.SpatialDropout2D(0.8))
+    model.add(keras.layers.MaxPooling2D(2,2))
+
+    model.add(keras.layers.Conv2D(64, 3, padding="same", activation="relu"))
+    model.add(keras.layers.SpatialDropout2D(0.5))
+    model.add(keras.layers.MaxPooling2D(2,2))
+
+    model.add(keras.layers.Conv2D(128, 3, padding="same", activation="relu"))
+    model.add(keras.layers.SpatialDropout2D(0.5))
+    model.add(keras.layers.MaxPooling2D(2,2))
+
     model.add(keras.layers.Flatten())
-    model.add(keras.layers.Dense(192, activation="relu"))
-    model.add(keras.layers.Dense(192, activation="relu"))
+
+    model.add(keras.layers.Dense(256, activation="relu"))
+    model.add(keras.layers.Dropout(0.5))
+
     model.add(keras.layers.Dense(2, activation="softmax"))
 
     return model
 
-#look at cross validation
 def model_run(data, model):
-    datagen = keras.preprocessing.image.ImageDataGenerator(
-        rotation_range=15,
-        zoom_range=0.3,
-        shear_range=0.1,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        horizontal_flip=True)
 
-    datagen.fit(data["x_train"])
-
-    learning_rate = 0.0001
-    epochs = 300
+    learning_rate = 0.0005
+    epochs = 100
 
     tf.summary.scalar("learning rate", data=learning_rate, step=epochs)
 
     model, record = process_model(
         model,
         data,
-        opt=keras.optimizers.Adam(lr=learning_rate),
+        opt= keras.optimizers.Adam(lr=learning_rate), #"adam"
         loss="sparse_categorical_crossentropy",
         epochs=epochs,
-        steps_per_epoch=int(len(data["x_train"]) / 16),
-        batch_size=16,
+        batch_size=32,
         tensorboard_callback=keras.callbacks.TensorBoard(log_dir=logdir, update_freq=1)
     )
 
@@ -110,17 +104,16 @@ def main():
     model = model_run(data, model)
     model.save("xray_pred_model")
 
-    # Make actual predictions
-    pred = (model.predict(data["x_test"]) > 0.5).astype("int32")
-    pred = [i.index(1) for i in np.ndarray.tolist(pred)]
-    print(classification_report(data["y_test"], pred, target_names=[labels[0][0],labels[1][0]]))
+    cutoff1 = int(len(data["x_train"]) * 0.1)
+    cutoff2 = int(len(data["x_train"]) * 0.9)
 
-    # Using validation data to evaluate model
-    __, accuracy = model.evaluate(data["x_test"], data["y_test"])
+    eval_on_train_x = np.concatenate((data["x_train"][:cutoff1], data["x_train"][cutoff2:]), axis=0)
+    eval_on_train_y = np.concatenate((data["y_train"][:cutoff1], data["y_train"][cutoff2:]), axis=0)
+
+    __, accuracy = model.evaluate(eval_on_train_x, eval_on_train_y)
     print('Test Data Accuracy: {}%'.format(accuracy * 100))
 
     sess.close()
-
 
 if __name__ == "__main__":
     main()

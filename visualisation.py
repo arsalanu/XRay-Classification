@@ -3,11 +3,18 @@ import os
 import numpy as np
 import time
 import random
-from tensorflow import keras
+from tensorflow.compat.v1 import keras
 from data_extractor import label_generator
+import tensorflow.compat.v1 as tf
+
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.allow_growth = True
+
+sess = tf.compat.v1.Session(config=config)
+
 
 model = keras.models.load_model('xray_pred_model')
-dir = "Datasets\\archive\\chest_xray\\random"
+dir = "Datasets/archive/chest_xray/random"
 labels = label_generator("labeldata.json")
 
 input_limit = 1000
@@ -56,3 +63,4 @@ for file in os.listdir(dir):
         cv2.destroyAllWindows()
         break
 
+sess.close()

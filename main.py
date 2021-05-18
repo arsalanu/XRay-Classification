@@ -45,28 +45,29 @@ def output_visualise(record, epochs):
 def model_flow(image_input_size):
     model = keras.models.Sequential()
 
-    model.add(keras.layers.Conv2D(32, 3, padding="same", activation="relu",
+    model.add(keras.layers.Conv2D(64, 3, padding="same", activation="relu",
                                    input_shape=(image_input_size[0], image_input_size[1], 3)))
-    model.add(keras.layers.SpatialDropout2D(0.8))
+    model.add(keras.layers.SpatialDropout2D(0.7))
     model.add(keras.layers.MaxPooling2D(2,2))
 
     model.add(keras.layers.Conv2D(64, 3, padding="same", activation="relu"))
-    model.add(keras.layers.SpatialDropout2D(0.8))
-    model.add(keras.layers.MaxPooling2D(2,2))
-
-    model.add(keras.layers.Conv2D(64, 3, padding="same", activation="relu"))
-    model.add(keras.layers.SpatialDropout2D(0.5))
+    model.add(keras.layers.SpatialDropout2D(0.7))
     model.add(keras.layers.MaxPooling2D(2,2))
 
     model.add(keras.layers.Conv2D(128, 3, padding="same", activation="relu"))
-    model.add(keras.layers.SpatialDropout2D(0.5))
+    model.add(keras.layers.SpatialDropout2D(0.7))
+    model.add(keras.layers.MaxPooling2D(2,2))
+
+    model.add(keras.layers.Conv2D(128, 3, padding="same", activation="relu"))
+    model.add(keras.layers.SpatialDropout2D(0.7))
     model.add(keras.layers.MaxPooling2D(2,2))
 
     model.add(keras.layers.Flatten())
 
-    model.add(keras.layers.Dense(256, activation="relu"))
-    model.add(keras.layers.Dropout(0.5))
-
+    model.add(keras.layers.Dense(1024, activation="relu")) #go back to 1024 neurons if worse
+    model.add(keras.layers.Dropout(0.4))
+    model.add(keras.layers.Dense(1024, activation="relu")) #go back to 1024 neurons if worse
+    model.add(keras.layers.Dropout(0.4))
     model.add(keras.layers.Dense(2, activation="softmax"))
 
     return model
@@ -74,7 +75,7 @@ def model_flow(image_input_size):
 def model_run(data, model):
 
     learning_rate = 0.0005
-    epochs = 100
+    epochs = 40
 
     tf.summary.scalar("learning rate", data=learning_rate, step=epochs)
 
@@ -103,14 +104,8 @@ def main():
 
     model = model_run(data, model)
     model.save("xray_pred_model")
-
-    cutoff1 = int(len(data["x_train"]) * 0.1)
-    cutoff2 = int(len(data["x_train"]) * 0.9)
-
-    eval_on_train_x = np.concatenate((data["x_train"][:cutoff1], data["x_train"][cutoff2:]), axis=0)
-    eval_on_train_y = np.concatenate((data["y_train"][:cutoff1], data["y_train"][cutoff2:]), axis=0)
-
-    __, accuracy = model.evaluate(eval_on_train_x, eval_on_train_y)
+    
+    __, accuracy = model.evaluate(data["x_test"], data["y_test"])
     print('Test Data Accuracy: {}%'.format(accuracy * 100))
 
     sess.close()

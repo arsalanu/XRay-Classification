@@ -1,1 +1,2 @@
+xray_pred_model/variables/* filter=lfs diff=lfs merge=lfs -text
 xray_pred_model filter=lfs diff=lfs merge=lfs -text
